@@ -7,8 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:'NumClaros';src:local('Arial'),local('Helvetica Neue'),local('Helvetica'),local('Roboto');unicode-range:U+0030-0039}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#1b1530;background-image:radial-gradient(#2a2148 1px,transparent 1px);background-size:14px 14px;font-family:'Pixelify Sans',system-ui,sans-serif;color:#1a1424;-webkit-tap-highlight-color:transparent}
+button,#panel,#dialog,#controls{touch-action:manipulation}
+html,body{margin:0;min-height:100%;background:#1b1530;background-image:radial-gradient(#2a2148 1px,transparent 1px);background-size:14px 14px;font-family:'NumClaros','Pixelify Sans',system-ui,sans-serif;color:#1a1424;-webkit-tap-highlight-color:transparent}
 body{display:flex;justify-content:center;padding:14px 8px 24px}
 #console{width:100%;max-width:470px;background:linear-gradient(160deg,#7d5ad8,#5434b0 60%,#47289a);border-radius:22px 22px 70px 22px;padding:16px 16px 22px;box-shadow:0 8px 0 #2c1870,0 14px 30px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,255,255,.25)}
 #face{position:relative}
