@@ -23,6 +23,7 @@ body{display:flex;justify-content:center;padding:14px 8px 24px}
 #hud .st{color:#f8d838}
 #goal{position:absolute;left:6px;top:clamp(22px,6vw,26px);background:#f8d838;color:#1a1424;border:2px solid #1a1424;padding:1px 6px;font-size:clamp(10px,2.9vw,13px);font-weight:700;pointer-events:none;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #goal:empty{display:none}
+#screen.fighting #hud,#screen.fighting #goal{display:none}
 #toast{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);background:#1a1424;color:#f8f8f0;border:2px solid #f8f8f0;padding:4px 8px;font-size:clamp(11px,3vw,14px);max-width:92%;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.on{opacity:1}
 #dialog{position:absolute;left:4px;right:4px;bottom:4px;background:#f8f8f0;border:3px solid #1a1424;box-shadow:inset 0 0 0 2px #8aa4e8;border-radius:4px;display:flex;gap:8px;padding:6px 8px;align-items:flex-start;cursor:pointer;max-height:62%}
@@ -365,6 +366,9 @@ let NB=null;function hat(t,v){if(!NB){NB=actx.createBuffer(1,actx.sampleRate*.05
 const seq=t=>t.replace(/\|/g,' ').trim().split(/\s+/).map(x=>x==='.'?null:x);
 const bassOf=bars=>bars.flatMap(b=>b.length===2?[b[0],null,b[1],null,b[0],null,b[1],null]:[b[0],null,b[1],null,b[2],null,b[3],null]);
 const TRACKS={
+ fight:{bpm:150,duty:.25,vol:.07,hat:true,
+  lead:seq('A4 A4 C5 A4 D5 . C5 A4 | E5 . D5 C5 A4 . G4 A4 | F4 F4 A4 F4 C5 . A4 F4 | G4 . B4 D5 E5 . E5 .'),
+  bass:bassOf([['A2','E3'],['A2','E3'],['F2','C3'],['G2','D3']])},
  map:{bpm:132,duty:.25,vol:.075,hat:true,
   lead:seq('E5 . G5 E5 C5 . D5 E5 | C5 . A4 . E5 . D5 C5 | A4 . C5 F5 E5 . C5 A4 | B4 . D5 G5 F5 E5 D5 . | E5 . G5 C6 B5 . G5 E5 | A5 . E5 C5 D5 . E5 . | F5 E5 D5 C5 B4 . D5 . | C5 . G4 . C5 . . .'),
   bass:bassOf([['C3','G3'],['A2','E3'],['F2','C3'],['G2','D3'],['C3','G3'],['A2','E3'],['F2','C3','G2','D3'],['C3','G3']])},
@@ -378,7 +382,7 @@ function mTick(){const tr=TRACKS[mTrack];if(!tr)return;const sp=60/tr.bpm/2;
     if(tr.hat&&i%2===0)hat(mNext,i%4===0?.05:.022);mNext+=sp;mStep++;}}
 function setTrack(name){if(!ensureCtx())return;if(mTrack===name&&mTimer)return;mTrack=name;mStep=0;mNext=actx.currentTime+.08;if(!mTimer)mTimer=setInterval(mTick,30);}
 function stopMusic(){clearInterval(mTimer);mTimer=null;mTrack=null;}
-function musicCheck(){if(!music||!musicStarted||!actx)return;const want=quizOpen?'quiz':'map';if(want!==mTrack)setTrack(want);}
+function musicCheck(){if(!music||!musicStarted||!actx)return;const want=mode==='fight'?'fight':(quizOpen?'quiz':'map');if(want!==mTrack)setTrack(want);}
 const unlockAudio=()=>{if(!musicStarted){musicStarted=true;ensureCtx();}else if(actx&&actx.state==='suspended')actx.resume();};
 addEventListener('pointerdown',unlockAudio,true);addEventListener('keydown',unlockAudio,true);
 document.addEventListener('visibilitychange',()=>{if(!actx)return;if(document.hidden)actx.suspend();else if(music||snd)actx.resume();});
@@ -452,7 +456,7 @@ function drawSpr(img,x,y,flip){if(flip){ctx.save();ctx.translate(x+16,y);ctx.sca
 function drawBig(img,px,py,bob){if(!imok(img))return;const w=img.naturalWidth/3,h=img.naturalHeight/3;ctx.drawImage(img,Math.round((px+8-w/2)*3)/3,Math.round((py+15-h-(bob||0))*3)/3,w,h);}
 function shadowBig(x,y){ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x+2,y+13,12,3);}
 function shadow(x,y){ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(x+3,y+14,10,2);}
-function render(){
+function render(){if(mode==='fight'&&F){renderFight();return;}
   if(!mapC)return;ctx.drawImage(mapC,0,0);const st=day().stations;
   st.forEach((s,i)=>{if(i<S.stage){const X=s.x*16+10,Y=s.y*16+1;ctx.fillStyle='#1a1424';ctx.fillRect(X-1,Y-1,7,7);ctx.fillStyle='#4cd04c';ctx.fillRect(X,Y,5,5);ctx.fillStyle='#f8f8f0';ctx.fillRect(X+1,Y+2,1,1);ctx.fillRect(X+2,Y+3,1,1);ctx.fillRect(X+3,Y+1,1,2);}});
   if(S.stage<2){const cp=carPos();const X=cp.x*16,Y=cp.y*16;ctx.fillStyle='#8a4a20';ctx.fillRect(X+17,Y+2,5,4);ctx.fillStyle='#f4c098';ctx.fillRect(X+18,Y+3,3,3);ctx.fillStyle='#d83c3c';ctx.fillRect(X+17,Y+6,5,1);}
@@ -481,7 +485,7 @@ function tryMove(d){P.dir=d;const[dx,dy]=DIRS[d];const nx=P.x+dx,ny=P.y+dy;
   const n=npcAt(nx,ny);if(n){if(n.quip&&performance.now()-lastToast>2200){lastToast=performance.now();toast(n.quip);}return;}
   const si=stAt(nx,ny);if(si>S.stage){if(performance.now()-lastToast>1500){lastToast=performance.now();toast('Primero: '+day().stations[S.stage].name);}return;}
   P.fx=P.x;P.fy=P.y;P.x=nx;P.y=ny;P.t=0;P.moving=true;sfx.step();}
-function update(){if(mode!=='map')return;
+function update(){if(mode==='fight'&&F){updateFight();return;}if(mode!=='map')return;
   if(P.moving){P.t+=.11;if(P.t>=1){P.t=1;P.moving=false;P.fx=P.x;P.fy=P.y;if(stAt(P.x,P.y)===S.stage){held=null;trigger();return;}}}
   if(!P.moving&&held)tryMove(held);}
 function loop(){update();render();hud();musicCheck();requestAnimationFrame(loop);}
@@ -606,23 +610,115 @@ function titleScreen(){const sv=loadSave();S=sv?Object.assign(fresh(),sv):fresh(
   const p=openPanel(`<div class="title"><div class="logo">IMPULSO<br>LECTOR</div><div class="sub">La aventura del examinador · Escuela de Matilla · 2° básico</div><div class="small">¿Dónde está Betsy? Ahh... en su auto, en el estacionamiento.</div>
   <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Samuel y Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
   <p>Recorre el colegio paso a paso durante el Día 1 y el Día 2. Betsy te pondrá a prueba: responde lo que dice el manual... no lo que dice ella. Gabriel tiene un superpoder para ayudarte.</p></div>
-  <button class="opt main" id="tN">Nueva partida ▶</button>${sv?`<button class="opt" id="tC">${esc(contTxt)}</button>`:''}<button class="opt" id="tM">Ver torpedo</button>
-  <p class="small">Controles: flechas / WASD o la cruz · A (Enter) avanzar · START menú (música y efectos) · SELECT torpedo. Sube el volumen: tiene música.</p>
+  <button class="opt main" id="tN">Nueva partida ▶</button>${sv?`<button class="opt" id="tC">${esc(contTxt)}</button>`:''}<button class="opt" id="tF">Solo modo lucha: Samuel vs Betsy</button><button class="opt" id="tM">Ver torpedo</button>
+  <p class="small">Controles: flechas / WASD o la cruz · A (Enter) avanzar o golpear · B (X) superpoder en la lucha · START menú (música y efectos) · SELECT torpedo. Sube el volumen: tiene música.</p>
   <p class="small">Basado en el Manual de Aplicación Impulso Lector 2026 (Agencia de Calidad de la Educación). Betsy es un personaje humorístico.</p>`,0);
   mode='title';
-  const go=()=>{S=fresh();save();loadDay();closePanel();sfx.start();trigger();};
+  const go=()=>{S=fresh();save();loadDay();sfx.start();startFight(()=>{closePanel();trigger();});};
   p.querySelector('#tN').onclick=go;
   if(sv)p.querySelector('#tC').onclick=()=>{S=Object.assign(fresh(),sv);S.name='Samuel';S.kid='Gabriel';loadDay();closePanel();
     if(S.stage>=day().stations.length)dayEnd();else if(S.stage===0){sfx.start();trigger();}else mode='map';};
+  p.querySelector('#tF').onclick=()=>{loadDay();startFight(null);};
   p.querySelector('#tM').onclick=()=>torpedo(titleScreen);}
 
+/* ================= MODO LUCHA: SAMUEL VS BETSY ================= */
+const GROUND=140;let F=null,fightBg=null;
+function buildFightBg(){fightBg=document.createElement('canvas');fightBg.width=240;fightBg.height=160;const g=fightBg.getContext('2d');
+  const gr=g.createLinearGradient(0,0,0,130);gr.addColorStop(0,'#5aa8e8');gr.addColorStop(1,'#cfeaf8');g.fillStyle=gr;g.fillRect(0,0,240,160);
+  g.fillStyle='#e8d8b8';g.fillRect(0,112,240,22);g.fillStyle='#b8a888';for(let i=0;i<14;i++)g.fillRect(i*18+(i%2)*4,116+(i%3)*5,6,2);
+  g.save();g.translate(56,22);g.scale(2,2);drawSchool(g,0,0);g.restore();
+  g.save();g.translate(196,70);g.scale(2,2);drawPalm(g,0,0);g.restore();
+  g.save();g.translate(4,100);g.scale(1.5,1.5);drawCar(g,0,0);g.restore();
+  g.fillStyle='#cfc3ae';g.fillRect(0,134,240,26);g.fillStyle='#b4a890';for(let r=0;r<6;r++){g.fillRect(0,134+r*5,240,1);for(let c=0;c<20;c++)g.fillRect(c*12+(r%2)*6,134+r*5,1,5);}
+  g.fillStyle='#e8c040';g.fillRect(0,136,240,1);}
+function fighter(x,face,sc){return {x,y:GROUND,vx:0,vy:0,hp:100,hits:0,face,atk:0,hurt:0,cd:60,sc,fly:null,down:0,broom:null,lunge:0};}
+function startFight(after){closePanel();mode='fight';held=null;if(!fightBg)buildFightBg();$('screen').classList.add('fighting');
+  F={p:fighter(60,1,2/3),b:fighter(180,-1,0.82),t:0,phase:'intro',timer:170,fx:[],pencils:[],kid:null,after,shake:0,fatal:'',winner:null};}
+function fxText(t,x,y,col){F.fx.push({t,x,y,col:col||'#f8d838',life:40});}
+function hitSfx(){beep(140,.07,'square',.06);beep(90,.09,'sawtooth',.04,.03);}
+function dmg(who,n,kb){if(who.hp<=0)return;who.hp=Math.max(0,who.hp-n);who.hurt=18;who.x+=kb||0;F.shake=6;hitSfx();
+  if(who.hp<=0&&F.phase==='fight'){F.phase='ko';F.timer=170;F.fx=[];F.winner=who===F.b?'samuel':'betsy';beep(440,.2,'square',.06);beep(330,.2,'square',.06,.2);beep(220,.4,'square',.06,.4);}}
+function fPunch(){if(!F||F.phase!=='fight')return;const p=F.p;if(p.atk>0||p.hurt>10)return;p.atk=14;beep(320,.04,'square',.03);}
+function fSuper(){if(!F||F.phase!=='fight'||F.kid)return;const p=F.p;if(p.hits<13){fxText('Faltan '+(13-p.hits)+' golpes',p.x,90,'#8ac8ff');return;}
+  p.hits-=13;F.kid={x:p.x+6*p.face,y:GROUND,dir:p.face,t:0};fxText('¡GABRIEL!',p.x,70,'#8ac8ff');sfx.start();}
+function clampX(f){f.x=Math.max(10,Math.min(230,f.x));}
+function updFighter(f){if(f.fly){f.x+=f.fly.vx;f.y+=f.fly.vy;f.fly.vy+=.22;f.fly.rot+=.35*Math.sign(f.fly.vx);if(f.y>=GROUND){f.y=GROUND;f.fly=null;f.down=60;F.shake=8;beep(80,.2,'sawtooth',.06);}clampX(f);return;}
+  if(f.down>0){f.down--;return;}
+  if(f.y<GROUND||f.vy<0){f.y+=f.vy;f.vy+=.24;if(f.y>=GROUND){f.y=GROUND;f.vy=0;}}
+  f.x+=f.vx;clampX(f);if(f.atk>0)f.atk--;if(f.hurt>0)f.hurt--;}
+function updateFight(){const p=F.p,b=F.b;F.t++;if(F.shake>0)F.shake--;
+  F.fx.forEach(e=>{e.life--;e.y-=.4;});F.fx=F.fx.filter(e=>e.life>0);
+  if(F.phase==='intro'){if(--F.timer<=0)F.phase='fight';if(F.timer===60){beep(523,.1,'square',.05);beep(784,.25,'square',.05,.1);}return;}
+  if(F.phase==='ko'){updFighter(b);updFighter(p);if(--F.timer<=0)endFight();return;}
+  /* Samuel */
+  p.vx=0;if(!p.fly&&p.down<=0){if(held==='left')p.vx=-1.4;if(held==='right')p.vx=1.4;if(held==='up'&&p.y>=GROUND&&p.vy===0){p.vy=-4.4;beep(500,.05,'triangle',.03);}}
+  if(!b.broom)p.face=b.x>=p.x?1:-1;
+  if(p.atk===9&&!b.fly&&b.down<=0&&!b.broom&&Math.abs(p.x-b.x)<28&&Math.abs(p.y-b.y)<22){dmg(b,4,5*p.face);p.hits=Math.min(26,p.hits+1);fxText(pick(['¡POW!','¡ZAS!','¡PAF!','¡TOMA!']),b.x,b.y-50);}
+  p.lunge=p.atk>6?4:0;updFighter(p);
+  /* Gabriel */
+  const k=F.kid;if(k){k.t++;k.x+=3.6*k.dir;k.y=GROUND-Math.abs(Math.sin(k.t*.4))*4;
+    if(!b.fly&&Math.abs(k.x-b.x)<14){b.broom=null;b.y=Math.min(b.y,GROUND);b.fly={vx:3.6*k.dir,vy:-5.5,rot:0};dmg(b,25,0);fxText('¡ABRAZO VOLADOR!',b.x,60,'#ff8ac8');F.fatal=b.hp<=0?'¡ABRAZO FATAL!':'';F.kid=null;}
+    else if(k.x<-10||k.x>250)F.kid=null;}
+  /* Betsy */
+  b.vx=0;const dist=Math.abs(p.x-b.x);
+  if(b.broom){const r=b.broom;r.t++;b.y+= (74-b.y)*.06;b.x+=Math.sin(r.t*.03)*1.6+(p.x-b.x)*.01;b.face=p.x<b.x?-1:1;
+    if(r.t%22===0){F.pencils.push({x:b.x,y:b.y-10,vy:.5,rot:Math.random()*.6-.3});beep(900,.03,'square',.02);}
+    if(r.t>260){b.broom=null;b.vy=0;fxText('Aterrizaje...',b.x,b.y-40,'#c8c8d8');}}
+  else if(!b.fly&&b.down<=0){b.face=p.x<b.x?-1:1;
+    if(b.hits>=13&&b.y>=GROUND){b.hits-=13;b.broom={t:0};fxText('¡ESCOBA VOLADORA!',b.x,60,'#ff8ac8');beep(300,.3,'sawtooth',.04);beep(600,.3,'sawtooth',.04,.15);}
+    else{if(b.cd>0)b.cd--;
+      if(dist>26)b.vx=.95*b.face;else if(dist<14)b.vx=-.7*b.face;
+      if(dist<=30&&b.cd<=0&&b.atk===0){b.atk=16;b.cd=45+Math.random()*55|0;}
+      if(Math.random()<.004&&b.y>=GROUND)b.vy=-3.8;}}
+  if(b.atk===9&&Math.abs(p.x-b.x)<30&&p.y>GROUND-14&&!p.fly){dmg(p,5,5*b.face);b.hits=Math.min(26,b.hits+1);fxText(pick(['¡CARPETAZO!','¡PAF!','¡TOMA!']),p.x,p.y-60,'#ff9a9a');}
+  b.lunge=b.atk>6?4:0;if(!b.broom)updFighter(b);else{if(b.atk>0)b.atk--;if(b.hurt>0)b.hurt--;}
+  /* Lápices */
+  F.pencils.forEach(c=>{c.vy+=.08;c.y+=c.vy;c.rot+=.15;if(Math.abs(c.x-p.x)<9&&c.y>p.y-56&&c.y<p.y){c.dead=1;dmg(p,4,0);fxText('¡LÁPIZ!',p.x,p.y-64,'#f8d838');}if(c.y>GROUND+4)c.dead=1;});
+  F.pencils=F.pencils.filter(c=>!c.dead);}
+function drawChar(f,imgL,imgR){const img=f.face<0?imgL:imgR;if(!imok(img))return;const w=img.naturalWidth*f.sc,h=img.naturalHeight*f.sc;
+  if(f.hurt>0&&f.hurt%4<2)return;ctx.save();const x=f.x+f.lunge*f.face;ctx.translate(x,f.y);
+  if(f.fly)ctx.rotate(f.fly.rot);else if(f.down>0){ctx.rotate(-Math.PI/2*f.face);ctx.translate(0,w/2);}
+  if(f.broom){ctx.fillStyle='#6e4620';ctx.fillRect(-26,-6,52,3);ctx.fillStyle='#d8b060';ctx.fillRect(f.face>0?-34:22,-9,12,9);ctx.fillStyle='#a07830';ctx.fillRect(f.face>0?-34:22,-6,12,2);}
+  ctx.drawImage(img,-w/2,-h,w,h);ctx.restore();}
+function renderFight(){ctx.save();if(F.shake)ctx.translate((Math.random()*4-2),(Math.random()*4-2));
+  ctx.drawImage(fightBg,0,0);
+  [F.p,F.b].forEach(f=>{if(!f.fly&&!f.broom){ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(f.x-12,GROUND-1,24,3);}});
+  drawChar(F.b,IMG.betsy_left,IMG.betsy_right);drawChar(F.p,IMG.dad_left,IMG.dad_right);
+  if(F.kid){const k=F.kid,img=k.dir>0?IMG.kid_right:IMG.kid_left;if(imok(img)){const w=img.naturalWidth*.7,h=img.naturalHeight*.7;ctx.drawImage(img,k.x-w/2,k.y-h,w,h);}}
+  F.pencils.forEach(c=>{ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.rot);ctx.fillStyle='#1a1424';ctx.fillRect(-2,-6,4,12);ctx.fillStyle='#f8d838';ctx.fillRect(-1,-5,2,8);ctx.fillStyle='#ec6cac';ctx.fillRect(-1,-5,2,2);ctx.fillStyle='#f4c098';ctx.fillRect(-1,3,2,2);ctx.fillStyle='#3a3a50';ctx.fillRect(0,5,1,1);ctx.restore();});
+  ctx.restore();
+  /* barras */
+  const bar=(x,hp,flip)=>{ctx.fillStyle='#1a1424';ctx.fillRect(x-1,7,102,9);ctx.fillStyle='#c83030';ctx.fillRect(x,8,100,7);ctx.fillStyle='#58d058';const w=hp;ctx.fillRect(flip?x+100-w:x,8,w,7);ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(flip?x+100-w:x,8,w,2);};
+  bar(8,F.p.hp,false);bar(132,F.b.hp,true);
+  const meter=(x,n,flip,col)=>{for(let i=0;i<13;i++){const xi=flip?x+100-(i+1)*7.6:x+i*7.6;ctx.fillStyle='#1a1424';ctx.fillRect(xi,18,7,4);ctx.fillStyle=i<Math.min(13,n)?(n>=13&&F.t%20<10?'#ffffff':col):'#3a3a50';ctx.fillRect(xi+1,19,5,2);}};
+  meter(8,F.p.hits,false,'#8ac8ff');meter(132,F.b.hits,true,'#ec6cac');
+  ctx.font='bold 7px "Press Start 2P",monospace';ctx.textBaseline='top';ctx.lineWidth=2;ctx.strokeStyle='#1a1424';
+  const txt=(t,x,y,col,al)=>{ctx.textAlign=al||'left';ctx.strokeText(t,x,y);ctx.fillStyle=col;ctx.fillText(t,x,y);};
+  txt('SAMUEL',8,25,'#f8f8f0');txt('BETSY',232,25,'#f8f8f0','right');
+  if(F.p.hits>=13&&F.phase==='fight')txt('B: ¡SUPERPODER!',8,35,F.t%20<10?'#8ac8ff':'#f8f8f0');
+  F.fx.forEach(e=>{ctx.font='bold 8px "Press Start 2P",monospace';txt(e.t,e.x,e.y,e.col,'center');});
+  const big=(t,y,col,s)=>{ctx.font=`bold ${s||16}px "Press Start 2P",monospace`;ctx.lineWidth=4;txt(t,120,y,col,'center');ctx.lineWidth=2;};
+  if(F.phase==='intro'){if(F.timer>60)big('ROUND 1',60,'#f8d838');else big('¡PELEA!',60,'#ff5050',20);
+    ctx.font='bold 6px "Press Start 2P",monospace';txt('◀ ▶ moverse  ▲ saltar  A golpe',120,96,'#f8f8f0','center');txt('B superpoder (cada 13 golpes)',120,106,'#8ac8ff','center');}
+  if(F.phase==='ko'){big('K.O.',44,'#ff5050',22);if(F.timer<120)big(F.winner==='samuel'?'¡SAMUEL GANA!':'¡BETSY GANA!',76,'#f8d838',11);if(F.fatal&&F.timer<90)big(F.fatal,96,'#ff8ac8',9);}
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';}
+function endFight(){const w=F.winner,after=F.after;$('screen').classList.remove('fighting');
+  const line=w==='samuel'?'Betsy: “Ya, ya, me ganaste. Ahora vamos a lo serio: la prueba.”':'Betsy: “Te gané. Pero igual tienes que aplicar la prueba, ¿ah?”';
+  const p=openPanel(`<div class="title"><h2>${w==='samuel'?'¡SAMUEL GANA!':'¡BETSY GANA!'}</h2>
+    <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Samuel y Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
+    <div class="betsy"><img src="${IMGSRC.betsy_front}" alt="" style="width:27px"><div>${esc(line)}</div></div></div>
+    <button class="opt main" id="fgGo">${after?'Comenzar el Día 1 ▶':'Volver al inicio'}</button><button class="opt" id="fgRe">Revancha</button>`);
+  F=null;
+  p.querySelector('#fgGo').onclick=()=>{if(after)after();else titleScreen();};
+  p.querySelector('#fgRe').onclick=()=>startFight(after);}
+
 /* ================= CONTROLES ================= */
-function pressA(){if(mode==='dialog')advanceDialog();else if(ctl)ctl.a();}
-function pressB(){if(mode==='dialog')advanceDialog();else if(ctl)ctl.b();}
-function dirPress(d){if(mode==='map')held=d;else if(ctl&&(d==='up'||d==='down'))ctl.move(d==='up'?-1:1);}
+function pressA(){if(mode==='fight'){fPunch();return;}if(mode==='dialog')advanceDialog();else if(ctl)ctl.a();}
+function pressB(){if(mode==='fight'){fSuper();return;}if(mode==='dialog')advanceDialog();else if(ctl)ctl.b();}
+function dirPress(d){if(mode==='map'||mode==='fight')held=d;else if(ctl&&(d==='up'||d==='down'))ctl.move(d==='up'?-1:1);}
 const KM={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const d=KM[e.key];
-  if(d){e.preventDefault();if(mode==='map')held=d;else if(!e.repeat||mode!=='map')dirPress(d);return;}
+  if(d){e.preventDefault();if(mode==='map'||mode==='fight')held=d;else if(!e.repeat||mode!=='map')dirPress(d);return;}
   if(e.key==='Enter'||e.key===' '||e.key==='z'||e.key==='Z'){e.preventDefault();pressA();return;}
   if(e.key==='x'||e.key==='X'||e.key==='Escape'||e.key==='Backspace'){pressB();return;}
   if(e.key==='m'||e.key==='M'){if(mode==='map')menu();}});

@@ -4,6 +4,7 @@ Juego web estilo consola portátil (pixel art) para repasar, paso a paso, el Dí
 
 - Recorre el mapa de la escuela y responde las preguntas que hace Betsy, la supervisora.
 - Protagonistas: Samuel (el examinador) y su hijo Gabriel, cuyo superpoder es el Abrazo: una segunda oportunidad.
+- Antes de empezar: modo lucha Samuel vs Betsy, estilo Mortal Kombat antiguo (Gabriel y su "abrazo volador" contra la escoba voladora de Betsy).
 - Incluye torpedo (resumen) con horarios y pasos clave, y música de fondo estilo chiptune.
 
 Jugar: https://abgdanielm.github.io/Juego-Impulso-Lector/
