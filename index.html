@@ -186,6 +186,9 @@ const DAYS=[
 {title:'DÍA 1',sub:'Precursores de la lectura',stations:[
  {x:1,y:8,icon:'casa',name:'Tu casa',time:'06:45',lines:[
   ['N','DÍA 1 · 06:45. Suena el despertador. Hoy parte la aplicación de Impulso Lector en 2° básico.'],
+  ['KID','Papá, ¿dónde está Betsy?'],
+  ['P','Mmm... buena pregunta. ¿Dónde estará Betsy?'],
+  ['N','Ahh... está en su auto, en el estacionamiento de la escuela. Llegó a las 6 de la mañana.'],
   ['BW','¡Buenos días! Hoy es la prueba de 4° medio, ¿cierto? Llegue tranquilo a las 9, que a esa hora empieza.'],
   ['P','Betsy... es 2° básico. Mejor reviso el manual antes de salir.'],
   ['KID','¡Papá, yo voy contigo! Tengo superpoderes.'],
@@ -195,7 +198,7 @@ const DAYS=[
   {q:'¿A qué hora debes llegar al establecimiento?',o:['Antes de las 08:00','A las 09:00, cuando empieza la prueba','A las 08:45, junto con los niños','Da lo mismo, la caja ya está allá'],b:1,e:'Debes tomar resguardos para llegar antes de las 08:00. La prueba parte a las 09:00, pero antes hay mucho que preparar.',p:'21'},
   {q:'¿Qué no puede faltar en tu mochila?',o:['Cédula de identidad, celular cargado, credencial y Manual de Aplicación','Solo la credencial; lo demás lo trae la supervisora','Lápices y gomas para los niños','Una cámara para sacar fotos de recuerdo'],b:1,e:'Cédula, celular cargado, credencial y manual. Lápices, gomas y sacapuntas vienen en la caja-curso, y está prohibido tomar fotos o videos.',p:'21'}]},
  {x:4,y:8,icon:'none',name:'Portón Escuela de Matilla',time:'07:50',lines:[
-  ['N','07:50 · Llegas al portón de la Escuela de Matilla. Ni rastro de Betsy.'],
+  ['N','07:50 · Llegas al portón de la Escuela de Matilla. Ni rastro de Betsy... aparentemente.'],
   ['PW','Betsy, ya llegué. Estoy afuera del colegio, ¿dónde está?'],
   ['BW','¡Aquí estoy hace rato! En el estacionamiento, frente a la escuela. ¿No me ves? El auto gris.'],
   ['N','Betsy lleva 45 minutos sentada en su auto, con la radio puesta, a 20 metros del portón.'],
@@ -600,7 +603,7 @@ function menu(){const p=openPanel(`<h2>PAUSA</h2><p>${esc(day().title)} · ${esc
 function titleScreen(){const sv=loadSave();S=sv?Object.assign(fresh(),sv):fresh();S.name='Samuel';S.kid='Gabriel';
   if(S.day>1)S.day=1;buildMap();placePlayer();
   const contTxt=sv?(sv.day===1&&sv.stage>=DAYS[1].stations.length?'Ver resultado':`Continuar (${DAYS[sv.day].title}, ★ ${sv.stars})`):'';
-  const p=openPanel(`<div class="title"><div class="logo">IMPULSO<br>LECTOR</div><div class="sub">La aventura del examinador · Escuela de Matilla · 2° básico</div>
+  const p=openPanel(`<div class="title"><div class="logo">IMPULSO<br>LECTOR</div><div class="sub">La aventura del examinador · Escuela de Matilla · 2° básico</div><div class="small">¿Dónde está Betsy? Ahh... en su auto, en el estacionamiento.</div>
   <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Samuel</small></div><div><img src="${IMGSRC.kid_front}" alt="" style="width:38px"><small>Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
   <p>Recorre el colegio paso a paso durante el Día 1 y el Día 2. Betsy te pondrá a prueba: responde lo que dice el manual... no lo que dice ella. Gabriel tiene un superpoder para ayudarte.</p></div>
   <button class="opt main" id="tN">Nueva partida ▶</button>${sv?`<button class="opt" id="tC">${esc(contTxt)}</button>`:''}<button class="opt" id="tM">Ver machete</button>
