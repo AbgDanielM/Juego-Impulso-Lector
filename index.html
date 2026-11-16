@@ -194,7 +194,7 @@ const DAYS=[
   ['KID','¡Agú! ¡Ta-ta!'],
   ['N','Gabriel se acomoda en tus brazos. Hoy va contigo.'],
   ['N','En las preguntas puedes usar el superpoder de {k}: el “Abrazo” te da una segunda oportunidad si fallas. Tienes 2 por día.'],
-  ['N','Camina con las flechas (o la cruz de abajo). Sigue la flecha amarilla. A = avanzar. SELECT = machete.']],
+  ['N','Camina con las flechas (o la cruz de abajo). Sigue la flecha amarilla. A = avanzar. SELECT = torpedo.']],
   qs:[
   {q:'¿A qué hora debes llegar al establecimiento?',o:['Antes de las 08:00','A las 09:00, cuando empieza la prueba','A las 08:45, junto con los niños','Da lo mismo, la caja ya está allá'],b:1,e:'Debes tomar resguardos para llegar antes de las 08:00. La prueba parte a las 09:00, pero antes hay mucho que preparar.',p:'21'},
   {q:'¿Qué no puede faltar en tu mochila?',o:['Cédula de identidad, celular cargado, credencial y Manual de Aplicación','Solo la credencial; lo demás lo trae la supervisora','Lápices y gomas para los niños','Una cámara para sacar fotos de recuerdo'],b:1,e:'Cédula, celular cargado, credencial y manual. Lápices, gomas y sacapuntas vienen en la caja-curso, y está prohibido tomar fotos o videos.',p:'21'}]},
@@ -327,7 +327,7 @@ const NPCS=[
 const COORDS=[[[1,8],[5,8],[9,8],[9,5],[12,5],[12,2],[8,2],[4,2],[2,4]],[[1,8],[5,8],[9,8],[9,4],[12,4],[12,2],[4,3]]];
 DAYS.forEach((d,i)=>d.stations.forEach((st,j)=>{st.x=COORDS[i][j][0];st.y=COORDS[i][j][1];}));
 const CARS=[{x:2,y:7},{x:2,y:7}];
-const MACHETE={
+const TORPEDO={
  d1:['Antes de las 08:00: cédula, celular cargado, credencial y manual.','Recibir caja-curso: revisar etiqueta y sobre (día y curso) y escanear QR de la caja (ClaveÚnica, datos del curso, rol).','Saludar al director y coordinar con el docente de apoyo (contacto, organización, protocolo de desregulación, NEE).','08:20 en la sala: cargar parlante y probar pendrive, revisar caja (sello rojo = sin revisar, gris = revisada), nombres de los examinadores en la pizarra, preguntar por estudiantes nuevos, mesas ordenadas, material pedagógico cubierto, lápiz y goma en cada puesto.','08:30 formar por orden de lista. 08:45 límite de ingreso. Llamar por nombre y n° de lista, verificar n° de cuadernillo, registrar asistencia. Ausente: puesto vacío.','09:00 Módulo 1 (Act. 1-4): láminas obligatorias, leer textual; avanzar con el 90%; nombrar imágenes con el término exacto; al terminar instrucciones: hora de inicio y QR de la bolsa.','Recreo 15 min desde que sale el último; cuadernillos quedan en el puesto.','Módulo 2 (Act. 5-9): Act. 8 con pendrive en el parlante (parte a los 6 s, se repite a los 30 s).','Fin del Módulo 2: Cuestionario Apoderados(as) a cada niño por su nombre. Cuestionario Docente al profesor jefe.','Cierre: orden ascendente, contar, bolsas, formularios completos, director firma y timbra el Acta de Control de Eventos, sello azul, formularios al supervisor.'],
  d2:['Antes de las 08:00. Recibir caja Día 2 y escanear su QR.','Cargar grabadora, verificar que encienda y anotar la Serie curso grabadora.','09:00 Módulo 3: pedir cuestionarios y registrar su n°; mínimo 15 min sin máximo; si terminan antes, revisar y luego set de actividades; quien sale no reingresa; instrucciones textuales y trabajo autónomo.','Recreo 15 min; preparar texto y grabadora.','Módulo 4 Fluidez: siempre con docente de apoyo (si no, no se inicia); QR de la grabadora; “Serie” + dígitos uno a uno + nombre completo; ausente, no lector o no quiere leer: se graba igual indicando la situación; REC por error: seguir; la dupla trae grupos de 3 a 5; ~3 min por niño.','Cierre: formularios dentro de la caja Día 2; quien no trajo cuestionario lo entrega al día siguiente al director; Acta firmada y timbrada; despedirse; devolver caja y credencial.'],
  siempre:['Nada de fotos ni videos de estudiantes o material. Nada en redes sociales.','Celular en silencio; solo para hablar con el supervisor y escanear QR.','Solo se aclaran dudas de las instrucciones, nunca del contenido.','Desregulación o celular de un alumno: actúa el docente de apoyo.','Falta material: avisar al supervisor, pedir contingencia y registrar en el Acta de Control de Eventos.','Formularios: lápiz pasta azul oscuro, imprenta mayúscula, sin tildes, horas en formato 00:00 a 23:59.','Consultas a la Agencia: 600 225 4323, anexo 3.']
@@ -572,28 +572,28 @@ function dayEnd(){
   else finalScreen();}
 
 function finalScreen(){const pct=S.stars/TOTAL;
-  const rank=pct>=.9?['EXAMINADOR LEGENDARIO','Betsy: “Te felicito. Yo sabía que te iba a ir bien... ¿era de 2° básico, cierto?”']:pct>=.7?['EXAMINADOR CERTIFICADO','Betsy: “Muy bien. La próxima te paso yo el dato del horario.” (Mejor no.)']:pct>=.5?['EXAMINADOR EN PRÁCTICA','Betsy: “Tranquilo, yo tampoco me lo sé y aquí estoy.”']:['NIVEL BETSY','Betsy: “¡Eso! Igualito que yo.” Conviene repasar el machete...'];
+  const rank=pct>=.9?['EXAMINADOR LEGENDARIO','Betsy: “Te felicito. Yo sabía que te iba a ir bien... ¿era de 2° básico, cierto?”']:pct>=.7?['EXAMINADOR CERTIFICADO','Betsy: “Muy bien. La próxima te paso yo el dato del horario.” (Mejor no.)']:pct>=.5?['EXAMINADOR EN PRÁCTICA','Betsy: “Tranquilo, yo tampoco me lo sé y aquí estoy.”']:['NIVEL BETSY','Betsy: “¡Eso! Igualito que yo.” Conviene repasar el torpedo...'];
   const errs=S.wrong.length?S.wrong.map(w=>`<div class="err"><b>Día ${w.d+1}:</b> ${esc(w.q)}<br>✔ ${esc(w.a)} <span class="small">(pág. ${esc(w.p)})</span></div>`).join(''):'<p>Sin errores. Ni Betsy pudo confundirte.</p>';
   const p=openPanel(`<div class="title"><h2>¡APLICACIÓN COMPLETA!</h2><div class="stars">★ ${S.stars} / ${TOTAL}</div><div class="tag">${rank[0]}</div>
   <div class="chars"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>${esc(S.name)}</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px;margin-top:54px"><small>Betsy</small></div></div>
   <div class="betsy"><img src="${IMGSRC.betsy_front}" alt="" style="width:27px"><div>${esc(rank[1])}</div></div></div>
   <h3>Para repasar</h3>${errs}
-  <button class="opt main" id="fM">Ver machete</button><button class="opt" id="fR">Jugar de nuevo</button>`);
-  p.querySelector('#fM').onclick=()=>machete(finalScreen);
+  <button class="opt main" id="fM">Ver torpedo</button><button class="opt" id="fR">Jugar de nuevo</button>`);
+  p.querySelector('#fM').onclick=()=>torpedo(finalScreen);
   p.querySelector('#fR').onclick=()=>{S=fresh();try{localStorage.removeItem(KEY);}catch(e){}titleScreen();};}
 
-function machete(back){const li=a=>'<ul class="m">'+a.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>';
-  const p=openPanel(`<h2>MACHETE</h2>
+function torpedo(back){const li=a=>'<ul class="m">'+a.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>';
+  const p=openPanel(`<h2>TORPEDO</h2>
   <div class="timeline"><b>08:00</b><span>Llegar al colegio</span><b>08:20</b><span>En la sala</span><b>08:30</b><span>Formar al curso</span><b>08:45</b><span>Límite de ingreso</span><b>09:00</b><span>Inicio de la aplicación</span><b>15'</b><span>Recreo (desde que sale el último)</span></div>
-  <h3>Día 1 · Precursores de la lectura</h3>${li(MACHETE.d1)}<h3>Día 2 · Comprensión y Fluidez</h3>${li(MACHETE.d2)}<h3>Siempre</h3>${li(MACHETE.siempre)}
+  <h3>Día 1 · Precursores de la lectura</h3>${li(TORPEDO.d1)}<h3>Día 2 · Comprensión y Fluidez</h3>${li(TORPEDO.d2)}<h3>Siempre</h3>${li(TORPEDO.siempre)}
   <p class="small">Fuente: Manual de Aplicación Impulso Lector 2026, Agencia de Calidad de la Educación.</p>
   <button class="opt main" data-back>Volver</button>`);
   p.querySelector('[data-back]').onclick=()=>{if(back)back();else{closePanel();mode='map';}};}
 
 function menu(){const p=openPanel(`<h2>PAUSA</h2><p>${esc(day().title)} · ${esc(day().sub)}<br>★ ${S.stars} · Preguntas respondidas: ${S.answered}/${TOTAL}</p>
-  <button class="opt main" data-back>Continuar</button><button class="opt" id="mM">Machete</button><button class="opt" id="mMu">Música: ${music?'ON':'OFF'}</button><button class="opt" id="mS">Efectos: ${snd?'ON':'OFF'}</button><button class="opt" id="mR">Volver al inicio</button>`);
+  <button class="opt main" data-back>Continuar</button><button class="opt" id="mM">Torpedo</button><button class="opt" id="mMu">Música: ${music?'ON':'OFF'}</button><button class="opt" id="mS">Efectos: ${snd?'ON':'OFF'}</button><button class="opt" id="mR">Volver al inicio</button>`);
   p.querySelector('[data-back]').onclick=()=>{closePanel();mode='map';};
-  p.querySelector('#mM').onclick=()=>machete(menu);
+  p.querySelector('#mM').onclick=()=>torpedo(menu);
   p.querySelector('#mS').onclick=()=>{snd=!snd;menu();};
   p.querySelector('#mMu').onclick=()=>{music=!music;if(!music)stopMusic();else{musicStarted=true;ensureCtx();}menu();};
   p.querySelector('#mR').onclick=()=>titleScreen();}
@@ -604,15 +604,15 @@ function titleScreen(){const sv=loadSave();S=sv?Object.assign(fresh(),sv):fresh(
   const p=openPanel(`<div class="title"><div class="logo">IMPULSO<br>LECTOR</div><div class="sub">La aventura del examinador · Escuela de Matilla · 2° básico</div><div class="small">¿Dónde está Betsy? Ahh... en su auto, en el estacionamiento.</div>
   <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Samuel</small></div><div><img src="${IMGSRC.kid_front}" alt="" style="width:38px"><small>Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
   <p>Recorre el colegio paso a paso durante el Día 1 y el Día 2. Betsy te pondrá a prueba: responde lo que dice el manual... no lo que dice ella. Gabriel tiene un superpoder para ayudarte.</p></div>
-  <button class="opt main" id="tN">Nueva partida ▶</button>${sv?`<button class="opt" id="tC">${esc(contTxt)}</button>`:''}<button class="opt" id="tM">Ver machete</button>
-  <p class="small">Controles: flechas / WASD o la cruz · A (Enter) avanzar · START menú (música y efectos) · SELECT machete. Sube el volumen: tiene música.</p>
+  <button class="opt main" id="tN">Nueva partida ▶</button>${sv?`<button class="opt" id="tC">${esc(contTxt)}</button>`:''}<button class="opt" id="tM">Ver torpedo</button>
+  <p class="small">Controles: flechas / WASD o la cruz · A (Enter) avanzar · START menú (música y efectos) · SELECT torpedo. Sube el volumen: tiene música.</p>
   <p class="small">Basado en el Manual de Aplicación Impulso Lector 2026 (Agencia de Calidad de la Educación). Betsy es un personaje humorístico.</p>`,0);
   mode='title';
   const go=()=>{S=fresh();save();loadDay();closePanel();sfx.start();trigger();};
   p.querySelector('#tN').onclick=go;
   if(sv)p.querySelector('#tC').onclick=()=>{S=Object.assign(fresh(),sv);S.name='Samuel';S.kid='Gabriel';loadDay();closePanel();
     if(S.stage>=day().stations.length)dayEnd();else if(S.stage===0){sfx.start();trigger();}else mode='map';};
-  p.querySelector('#tM').onclick=()=>machete(titleScreen);}
+  p.querySelector('#tM').onclick=()=>torpedo(titleScreen);}
 
 /* ================= CONTROLES ================= */
 function pressA(){if(mode==='dialog')advanceDialog();else if(ctl)ctl.a();}
@@ -632,7 +632,7 @@ document.querySelectorAll('#dpad button').forEach(b=>{const d=b.dataset.d;
 $('bA').addEventListener('pointerdown',e=>{e.preventDefault();pressA();});
 $('bB').addEventListener('pointerdown',e=>{e.preventDefault();pressB();});
 $('bStart').addEventListener('click',()=>{if(mode==='map')menu();else if(mode==='title')$('tN')&&$('tN').click();});
-$('bSel').addEventListener('click',()=>{if(mode==='map')machete();});
+$('bSel').addEventListener('click',()=>{if(mode==='map')torpedo();});
 
 titleScreen();loop();
 </script>
