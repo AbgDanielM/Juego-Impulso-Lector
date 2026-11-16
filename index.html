@@ -577,10 +577,11 @@ function finalScreen(){const pct=S.stars/TOTAL;
   const rank=pct>=.9?['EXAMINADOR LEGENDARIO','Betsy: “Te felicito. Yo sabía que te iba a ir bien... ¿era de 2° básico, cierto?”']:pct>=.7?['EXAMINADOR CERTIFICADO','Betsy: “Muy bien. La próxima te paso yo el dato del horario.” (Mejor no.)']:pct>=.5?['EXAMINADOR EN PRÁCTICA','Betsy: “Tranquilo, yo tampoco me lo sé y aquí estoy.”']:['NIVEL BETSY','Betsy: “¡Eso! Igualito que yo.” Conviene repasar el torpedo...'];
   const errs=S.wrong.length?S.wrong.map(w=>`<div class="err"><b>Día ${w.d+1}:</b> ${esc(w.q)}<br>✔ ${esc(w.a)} <span class="small">(pág. ${esc(w.p)})</span></div>`).join(''):'<p>Sin errores. Ni Betsy pudo confundirte.</p>';
   const p=openPanel(`<div class="title"><h2>¡APLICACIÓN COMPLETA!</h2><div class="stars">★ ${S.stars} / ${TOTAL}</div><div class="tag">${rank[0]}</div>
-  <div class="chars"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>${esc(S.name)}</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px;margin-top:54px"><small>Betsy</small></div></div>
+  <div class="chars"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>${esc(S.name)}</small></div><div><img src="${IMGSRC.kid_front}" alt="" style="width:38px;margin-top:114px"><small>Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px;margin-top:54px"><small>Betsy</small></div></div>
   <div class="betsy"><img src="${IMGSRC.betsy_front}" alt="" style="width:27px"><div>${esc(rank[1])}</div></div></div>
+  <a class="opt main" style="text-align:center;text-decoration:none" id="fP" href="https://abgdanielm.github.io/Juego-Impulso-Lector/resumen-impulso-lector.pdf" target="_blank" rel="noopener" download="Resumen-Impulso-Lector.pdf">Descargar resumen en PDF</a>
   <h3>Para repasar</h3>${errs}
-  <button class="opt main" id="fM">Ver torpedo</button><button class="opt" id="fR">Jugar de nuevo</button>`);
+  <button class="opt" id="fM">Ver torpedo</button><button class="opt" id="fR">Jugar de nuevo</button>`);
   p.querySelector('#fM').onclick=()=>torpedo(finalScreen);
   p.querySelector('#fR').onclick=()=>{S=fresh();try{localStorage.removeItem(KEY);}catch(e){}titleScreen();};}
 
