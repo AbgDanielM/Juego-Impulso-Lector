@@ -332,8 +332,8 @@ const MACHETE={
 /* ================= ESTADO ================= */
 const KEY='impulsoLectorGBA_v1';
 let S=fresh();
-function fresh(){return {name:'Examinador',kid:'',day:0,stage:0,stars:0,answered:0,wrong:[],pw:{hug:2}};}
-const kidN=()=>S.kid||'tu hijo';
+function fresh(){return {name:'Samuel',kid:'Gabriel',day:0,stage:0,stars:0,answered:0,wrong:[],pw:{hug:2}};}
+const kidN=()=>'Gabriel';
 const carPos=()=>({x:CARS[S.day].x,y:CARS[S.day].y});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function loadSave(){try{const t=localStorage.getItem(KEY);return t?JSON.parse(t):null;}catch(e){return null;}}
@@ -482,7 +482,7 @@ function loop(){update();render();hud();musicCheck();requestAnimationFrame(loop)
 
 /* ================= DIÁLOGO ================= */
 const PORT={betsy:['betsy_front',0,0,27,20],player:['dad_front',6,0,24,18],kid:['kid_front',1,0,17,13]};
-const SPK={N:{n:''},PW:{n:()=>S.name+', por WhatsApp',s:'player'},KID:{n:()=>S.kid||'Tu hijo',s:'kid'},B:{n:'Betsy (supervisora)',s:'betsy',sy:0},BW:{n:'Betsy, por WhatsApp',s:'betsy',sy:0},P:{n:()=>S.name,s:'player',sy:0},D:{n:'Director',s:'director',sy:1},T:{n:'Docente de apoyo en aula',s:'docente',sy:0},K:{n:'Niños de 2° básico',s:'k2',sy:4}};
+const SPK={N:{n:''},PW:{n:()=>S.name+', por WhatsApp',s:'player'},KID:{n:'Gabriel',s:'kid'},B:{n:'Betsy (supervisora)',s:'betsy',sy:0},BW:{n:'Betsy, por WhatsApp',s:'betsy',sy:0},P:{n:()=>S.name,s:'player',sy:0},D:{n:'Director',s:'director',sy:1},T:{n:'Docente de apoyo en aula',s:'docente',sy:0},K:{n:'Niños de 2° básico',s:'k2',sy:4}};
 const pc=$('portrait').getContext('2d');
 let dq=null;
 function say(lines,cb){mode='dialog';dq={lines,i:0,cb};showLine();}
@@ -597,21 +597,19 @@ function menu(){const p=openPanel(`<h2>PAUSA</h2><p>${esc(day().title)} · ${esc
   p.querySelector('#mMu').onclick=()=>{music=!music;if(!music)stopMusic();else{musicStarted=true;ensureCtx();}menu();};
   p.querySelector('#mR').onclick=()=>titleScreen();}
 
-function titleScreen(){const sv=loadSave();S=sv?Object.assign(fresh(),sv):fresh();
+function titleScreen(){const sv=loadSave();S=sv?Object.assign(fresh(),sv):fresh();S.name='Samuel';S.kid='Gabriel';
   if(S.day>1)S.day=1;buildMap();placePlayer();
   const contTxt=sv?(sv.day===1&&sv.stage>=DAYS[1].stations.length?'Ver resultado':`Continuar (${DAYS[sv.day].title}, ★ ${sv.stars})`):'';
   const p=openPanel(`<div class="title"><div class="logo">IMPULSO<br>LECTOR</div><div class="sub">La aventura del examinador · Escuela de Matilla · 2° básico</div>
-  <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Tú</small></div><div><img src="${IMGSRC.kid_front}" alt="" style="width:38px"><small>Superpoder</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
-  <p>Recorre el colegio paso a paso durante el Día 1 y el Día 2. Betsy te pondrá a prueba: responde lo que dice el manual... no lo que dice ella. Tu hijo tiene superpoderes para ayudarte.</p></div>
-  <label for="nm">Nombre del examinador</label><input id="nm" maxlength="14" placeholder="Examinador" value="${sv?esc(sv.name):''}"><label for="nk">Nombre de tu hijo (el superpoder)</label><input id="nk" maxlength="14" placeholder="Tu hijo" value="${sv&&sv.kid?esc(sv.kid):''}">
+  <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Samuel</small></div><div><img src="${IMGSRC.kid_front}" alt="" style="width:38px"><small>Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
+  <p>Recorre el colegio paso a paso durante el Día 1 y el Día 2. Betsy te pondrá a prueba: responde lo que dice el manual... no lo que dice ella. Gabriel tiene un superpoder para ayudarte.</p></div>
   <button class="opt main" id="tN">Nueva partida ▶</button>${sv?`<button class="opt" id="tC">${esc(contTxt)}</button>`:''}<button class="opt" id="tM">Ver machete</button>
   <p class="small">Controles: flechas / WASD o la cruz · A (Enter) avanzar · START menú (música y efectos) · SELECT machete. Sube el volumen: tiene música.</p>
   <p class="small">Basado en el Manual de Aplicación Impulso Lector 2026 (Agencia de Calidad de la Educación). Betsy es un personaje humorístico.</p>`,0);
   mode='title';
-  const go=()=>{const nm=($('nm').value||'').trim()||'Examinador';S=fresh();S.name=nm;S.kid=($('nk').value||'').trim();save();loadDay();closePanel();sfx.start();trigger();};
+  const go=()=>{S=fresh();save();loadDay();closePanel();sfx.start();trigger();};
   p.querySelector('#tN').onclick=go;
-  $('nm').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});
-  if(sv)p.querySelector('#tC').onclick=()=>{S=Object.assign(fresh(),sv);const nm=($('nm').value||'').trim();if(nm)S.name=nm;const nk=($('nk').value||'').trim();if(nk)S.kid=nk;loadDay();closePanel();
+  if(sv)p.querySelector('#tC').onclick=()=>{S=Object.assign(fresh(),sv);S.name='Samuel';S.kid='Gabriel';loadDay();closePanel();
     if(S.stage>=day().stations.length)dayEnd();else if(S.stage===0){sfx.start();trigger();}else mode='map';};
   p.querySelector('#tM').onclick=()=>machete(titleScreen);}
 
