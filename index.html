@@ -51,6 +51,13 @@ body{display:flex;justify-content:center;padding:14px 8px 24px}
 #ab button{width:58px;height:58px;border-radius:50%;border:none;background:#d2365c;color:#ffd0dc;font-family:'Press Start 2P';font-size:14px;box-shadow:0 4px 0 #861c3a;touch-action:none}
 #ab button:active{transform:translateY(3px);box-shadow:0 1px 0 #861c3a}
 #ab .b{margin-top:26px}
+#spRow{grid-column:1/3;display:none;justify-content:center;margin-top:14px}
+body.fight #spRow{display:flex}
+#bSp{border:3px solid #1a1424;border-radius:14px;padding:8px 22px;background:linear-gradient(#8a3048,#5a2030);color:#ffd0dc;font-family:'Press Start 2P',monospace;font-size:11px;box-shadow:0 4px 0 #3a1020;opacity:.6;display:flex;flex-direction:column;align-items:center;gap:4px;touch-action:none}
+#bSp .n{font-size:8px;opacity:.85}
+#bSp.ready{opacity:1;background:linear-gradient(#ff5050,#d81830 55%,#ff9a30);color:#fff;animation:spGlow .5s ease-in-out infinite alternate}
+@keyframes spGlow{from{box-shadow:0 4px 0 #6a0a1a,0 0 6px #ff4040;transform:scale(1)}to{box-shadow:0 4px 0 #6a0a1a,0 0 22px #ffd040;transform:scale(1.07)}}
+#bSp:active{transform:translateY(3px) scale(.98)}
 #ss{grid-column:1/3;display:flex;gap:22px;justify-content:center;margin-top:16px}
 #ss button{border:none;background:#3a2c74;color:#d8ccff;font-family:'Press Start 2P';font-size:8px;padding:7px 12px;border-radius:12px;transform:rotate(-12deg);box-shadow:0 3px 0 #22184a}
 #panel{position:fixed;inset:0;z-index:50;background:#101832;color:#f8f8f0;border:3px solid #f8f8f0;box-shadow:inset 0 0 0 3px #3a5ab0;border-radius:0;padding:max(10px,env(safe-area-inset-top)) max(12px,calc(50% - 290px)) max(14px,env(safe-area-inset-bottom));overflow:auto;font-size:clamp(14px,3.9vw,17px);line-height:1.3}
@@ -132,6 +139,7 @@ ul.m li{margin:4px 0}
         <button class="d" data-d="down" aria-label="Abajo">▼</button>
       </div>
       <div id="ab"><button class="b" id="bB" aria-label="B">B</button><button id="bA" aria-label="A">A</button></div>
+      <div id="spRow"><button id="bSp" aria-label="Ataque especial"><span class="t">★ ESPECIAL</span><span class="n" id="spN">0/13</span></button></div>
       <div id="ss"><button id="bSel">SELECT</button><button id="bStart">START</button></div>
     </div>
     <div id="panel" hidden></div>
@@ -492,7 +500,8 @@ function tryMove(d){P.dir=d;const[dx,dy]=DIRS[d];const nx=P.x+dx,ny=P.y+dy;
 function update(){if(mode==='fight'&&F){updateFight();return;}if(mode!=='map')return;
   if(P.moving){P.t+=.11;if(P.t>=1){P.t=1;P.moving=false;P.fx=P.x;P.fy=P.y;if(stAt(P.x,P.y)===S.stage){held=null;trigger();return;}}}
   if(!P.moving&&held)tryMove(held);}
-function loop(){update();render();hud();musicCheck();requestAnimationFrame(loop);}
+let lastSp='';function spUpd(){if(mode!=='fight'||!F)return;const n=Math.min(13,F.p.hits),r=n>=13&&!F.kid&&F.phase==='fight';const k=n+'|'+r;if(k===lastSp)return;lastSp=k;$('spN').textContent=r?'¡LISTO!':n+'/13';$('bSp').classList.toggle('ready',r);}
+function loop(){update();render();hud();musicCheck();spUpd();requestAnimationFrame(loop);}
 
 /* ================= DIÁLOGO ================= */
 const PORT={betsy:['betsy_front',0,0,27,20],player:['dad_front',6,0,24,18],kid:['kid_front',1,0,17,13]};
@@ -615,7 +624,7 @@ function titleScreen(){const sv=loadSave();S=sv?Object.assign(fresh(),sv):fresh(
   <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Samuel y Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
   <p>Recorre el colegio paso a paso durante el Día 1 y el Día 2. Betsy te pondrá a prueba: responde lo que dice el manual... no lo que dice ella. Gabriel tiene un superpoder para ayudarte.</p></div>
   <button class="opt main" id="tN">Nueva partida ▶</button>${sv?`<button class="opt" id="tC">${esc(contTxt)}</button>`:''}<button class="opt" id="tF">Solo modo lucha: Samuel vs Betsy</button><button class="opt" id="tM">Ver torpedo</button>
-  <p class="small">Controles: flechas / WASD o la cruz · A (Enter) avanzar o golpear · B (X) superpoder en la lucha · START menú (música y efectos) · SELECT torpedo. Sube el volumen: tiene música.</p>
+  <p class="small">Controles: flechas / WASD o la cruz · A (Enter) avanzar o golpear · en la lucha: B (X) patada y botón ESPECIAL (C) · START menú (música y efectos) · SELECT torpedo. Sube el volumen: tiene música.</p>
   <p class="small">Basado en el Manual de Aplicación Impulso Lector 2026 (Agencia de Calidad de la Educación). Betsy es un personaje humorístico.</p>`,0);
   mode='title';
   const go=()=>{S=fresh();save();loadDay();sfx.start();startFight(()=>{closePanel();trigger();});};
@@ -636,7 +645,7 @@ function buildFightBg(){fightBg=document.createElement('canvas');fightBg.width=2
   g.fillStyle='#cfc3ae';g.fillRect(0,134,240,26);g.fillStyle='#b4a890';for(let r=0;r<6;r++){g.fillRect(0,134+r*5,240,1);for(let c=0;c<20;c++)g.fillRect(c*12+(r%2)*6,134+r*5,1,5);}
   g.fillStyle='#e8c040';g.fillRect(0,136,240,1);}
 function fighter(x,face,kind){return {x,y:GROUND,vx:0,vy:0,hp:100,hits:0,face,atk:0,atkType:'p',atkDur:14,hurt:0,cd:60,kind,fly:null,down:0,broom:null,lunge:0,wp:0,superT:0};}
-function startFight(after){closePanel();mode='fight';held=null;if(!fightBg)buildFightBg();$('screen').classList.add('fighting');
+function startFight(after){closePanel();mode='fight';document.body.classList.add('fight');held=null;if(!fightBg)buildFightBg();$('screen').classList.add('fighting');
   F={p:fighter(46,1,'sam'),b:fighter(180,-1,'betsy'),t:0,phase:'intro',timer:240,fx:[],pencils:[],kid:null,after,shake:0,fatal:'',winner:null};}
 function fxText(t,x,y,col){F.fx.push({t,x,y,col:col||'#f8d838',life:40});}
 function hitSfx(){beep(140,.07,'square',.06);beep(90,.09,'sawtooth',.04,.03);}
@@ -742,14 +751,14 @@ function renderFight(){ctx.save();if(F.shake)ctx.translate((Math.random()*4-2),(
   ctx.font='bold 7px "Press Start 2P",monospace';ctx.textBaseline='top';ctx.lineWidth=2;ctx.strokeStyle='#1a1424';
   const txt=(t,x,y,col,al)=>{ctx.textAlign=al||'left';ctx.strokeText(t,x,y);ctx.fillStyle=col;ctx.fillText(t,x,y);};
   txt('SAMUEL',8,25,'#f8f8f0');txt('BETSY',232,25,'#f8f8f0','right');
-  if(F.p.hits>=13&&F.phase==='fight')txt('B: ¡SUPERPODER!',8,35,F.t%20<10?'#8ac8ff':'#f8f8f0');
+  if(F.p.hits>=13&&F.phase==='fight')txt('¡ESPECIAL LISTO!',8,35,F.t%20<10?'#8ac8ff':'#f8f8f0');
   F.fx.forEach(e=>{ctx.font='bold 8px "Press Start 2P",monospace';txt(e.t,e.x,e.y,e.col,'center');});
   const big=(t,y,col,s)=>{ctx.font=`bold ${s||16}px "Press Start 2P",monospace`;ctx.lineWidth=4;txt(t,120,y,col,'center');ctx.lineWidth=2;};
   if(F.phase==='intro'){if(F.timer>170){ctx.font='bold 6px "Press Start 2P",monospace';txt('Samuel deja a Gabriel en su coche...',120,60,'#f8f8f0','center');}else if(F.timer>60)big('ROUND 1',60,'#f8d838');else big('¡PELEA!',60,'#ff5050',20);
-    ctx.font='bold 6px "Press Start 2P",monospace';txt('◀ ▶ moverse  ▲ saltar  ▼ patada  A puño',120,96,'#f8f8f0','center');txt('B superpoder (cada 13 golpes)',120,106,'#8ac8ff','center');}
+    ctx.font='bold 6px "Press Start 2P",monospace';txt('◀ ▶ moverse  ▲ saltar  A puño  B patada',120,96,'#f8f8f0','center');txt('★ ESPECIAL: cada 13 golpes',120,106,'#ff8a8a','center');}
   if(F.phase==='ko'){big('K.O.',44,'#ff5050',22);if(F.timer<120)big(F.winner==='samuel'?'¡SAMUEL GANA!':'¡BETSY GANA!',76,'#f8d838',11);if(F.fatal&&F.timer<90)big(F.fatal,96,'#ff8ac8',9);}
   ctx.textAlign='left';ctx.textBaseline='alphabetic';}
-function endFight(){const w=F.winner,after=F.after;$('screen').classList.remove('fighting');
+function endFight(){document.body.classList.remove('fight');const w=F.winner,after=F.after;$('screen').classList.remove('fighting');
   const line=w==='samuel'?'Betsy: “Ya, ya, me ganaste. Ahora vamos a lo serio: la prueba.”':'Betsy: “Te gané. Pero igual tienes que aplicar la prueba, ¿ah?”';
   const p=openPanel(`<div class="title"><h2>${w==='samuel'?'¡SAMUEL GANA!':'¡BETSY GANA!'}</h2>
     <div class="chars" style="align-items:flex-end"><div><img src="${IMGSRC.dad_front}" alt="" style="width:64px"><small>Samuel y Gabriel</small></div><div><img src="${IMGSRC.betsy_front}" alt="" style="width:54px"><small>Betsy</small></div></div>
@@ -761,13 +770,14 @@ function endFight(){const w=F.winner,after=F.after;$('screen').classList.remove(
 
 /* ================= CONTROLES ================= */
 function pressA(){if(mode==='fight'){fPunch();return;}if(mode==='dialog')advanceDialog();else if(ctl)ctl.a();}
-function pressB(){if(mode==='fight'){fSuper();return;}if(mode==='dialog')advanceDialog();else if(ctl)ctl.b();}
-function dirPress(d){if(mode==='fight'&&d==='down'){fKick();return;}if(mode==='map'||mode==='fight')held=d;else if(ctl&&(d==='up'||d==='down'))ctl.move(d==='up'?-1:1);}
+function pressB(){if(mode==='fight'){fKick();return;}if(mode==='dialog')advanceDialog();else if(ctl)ctl.b();}
+function dirPress(d){if(mode==='fight'&&d==='down')return;if(mode==='map'||mode==='fight')held=d;else if(ctl&&(d==='up'||d==='down'))ctl.move(d==='up'?-1:1);}
 const KM={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const d=KM[e.key];
-  if(d){e.preventDefault();if(mode==='fight'&&d==='down'){if(!e.repeat)fKick();return;}if(mode==='map'||mode==='fight')held=d;else if(!e.repeat||mode!=='map')dirPress(d);return;}
+  if(d){e.preventDefault();if(mode==='fight'&&d==='down')return;if(mode==='map'||mode==='fight')held=d;else if(!e.repeat||mode!=='map')dirPress(d);return;}
   if(e.key==='Enter'||e.key===' '||e.key==='z'||e.key==='Z'){e.preventDefault();pressA();return;}
   if(e.key==='x'||e.key==='X'||e.key==='Escape'||e.key==='Backspace'){pressB();return;}
+  if((e.key==='c'||e.key==='C')&&mode==='fight'){fSuper();return;}
   if(e.key==='m'||e.key==='M'){if(mode==='map')menu();}});
 addEventListener('keyup',e=>{if(KM[e.key]===held)held=null;});
 document.querySelectorAll('#dpad button').forEach(b=>{const d=b.dataset.d;
@@ -776,6 +786,7 @@ document.querySelectorAll('#dpad button').forEach(b=>{const d=b.dataset.d;
   b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up);});
 $('bA').addEventListener('pointerdown',e=>{e.preventDefault();pressA();});
 $('bB').addEventListener('pointerdown',e=>{e.preventDefault();pressB();});
+$('bSp').addEventListener('pointerdown',e=>{e.preventDefault();if(mode==='fight')fSuper();});
 $('bStart').addEventListener('click',()=>{if(mode==='map')menu();else if(mode==='title')$('tN')&&$('tN').click();});
 $('bSel').addEventListener('click',()=>{if(mode==='map')torpedo();});
 
