@@ -186,12 +186,13 @@ const DAYS=[
 {title:'DÍA 1',sub:'Precursores de la lectura',stations:[
  {x:1,y:8,icon:'casa',name:'Tu casa',time:'06:45',lines:[
   ['N','DÍA 1 · 06:45. Suena el despertador. Hoy parte la aplicación de Impulso Lector en 2° básico.'],
-  ['KID','Papá, ¿dónde está Betsy?'],
-  ['P','Mmm... buena pregunta. ¿Dónde estará Betsy?'],
+  ['N','Gabriel apunta hacia la ventana, como preguntando algo.'],
+  ['P','Tienes razón, Gabriel... ¿dónde estará Betsy?'],
   ['N','Ahh... está en su auto, en el estacionamiento de la escuela. Llegó a las 6 de la mañana.'],
   ['BW','¡Buenos días! Hoy es la prueba de 4° medio, ¿cierto? Llegue tranquilo a las 9, que a esa hora empieza.'],
   ['P','Betsy... es 2° básico. Mejor reviso el manual antes de salir.'],
-  ['KID','¡Papá, yo voy contigo! Tengo superpoderes.'],
+  ['KID','¡Agú! ¡Ta-ta!'],
+  ['N','Gabriel se acomoda en tus brazos. Hoy va contigo.'],
   ['N','En las preguntas puedes usar el superpoder de {k}: el “Abrazo” te da una segunda oportunidad si fallas. Tienes 2 por día.'],
   ['N','Camina con las flechas (o la cruz de abajo). Sigue la flecha amarilla. A = avanzar. SELECT = machete.']],
   qs:[
@@ -202,7 +203,7 @@ const DAYS=[
   ['PW','Betsy, ya llegué. Estoy afuera del colegio, ¿dónde está?'],
   ['BW','¡Aquí estoy hace rato! En el estacionamiento, frente a la escuela. ¿No me ves? El auto gris.'],
   ['N','Betsy lleva 45 minutos sentada en su auto, con la radio puesta, a 20 metros del portón.'],
-  ['KID','Papá... la señora del auto te está haciendo señas.'],
+  ['N','Gabriel apunta al auto gris. Adentro, alguien hace señas.'],
   ['B','Ya, ya, me bajo. Toma tu caja. Ojo que creo que es la del Día 2... o la del 1. Una de las dos.'],
   ['P','La reviso, Betsy, gracias.']],
   qs:[
@@ -277,7 +278,7 @@ const DAYS=[
   ['N','07:50 · Portón de la Escuela de Matilla. Hoy ya sabes dónde buscar.'],
   ['PW','Betsy, ¿está en el estacionamiento otra vez?'],
   ['BW','¡Obvio! Llevo rato aquí. Hasta tengo mi estacionamiento favorito.'],
-  ['KID','Papá, la señora vive en su auto.'],
+  ['N','Gabriel ya ni mira el portón: apunta directo al auto gris.'],
   ['B','Toma tu caja del Día 2. Y tus formularios de ayer... creo que son estos.'],
   ['P','Los reviso, Betsy, gracias.']],
   qs:[
@@ -540,17 +541,14 @@ function askQ(st,q,i,n,done){
   function betsySay(t){p.querySelector('#bsay').textContent=t;}
   function bindPw(){const box=p.querySelector('#pwBox');box.innerHTML=pwHtml();
     box.querySelector('#pwHug').onclick=useHug;ctl.refresh();}
-  function useNo(){if(S.pw.no<=0)return;const bad=els.map((b,k)=>k).filter(k=>!opts[k].ok&&!els[k].disabled).sort((a,b)=>(opts[b].betsy?1:0)-(opts[a].betsy?1:0));
-    if(bad.length<1)return;S.pw.no--;save();bad.slice(0,2).forEach(k=>{els[k].disabled=true;els[k].classList.add('gone');});
-    sfx.start();kidSay(bad.some(k=>opts[k].betsy)?'¡Papá, esa no! Esa es la de la señora del auto.':'¡Papá, esa no! ¡Y esa tampoco!');betsySay('¡Oye! Eso es trampa.');bindPw();}
-  function useHug(){if(S.pw.hug<=0||shield)return;S.pw.hug--;shield=true;save();sfx.ok();kidSay('Abrazo de superpoder. Si fallas, te doy otra oportunidad.');betsySay('Ay, qué lindo... pero igual te pregunto.');bindPw();}
+  function useHug(){if(S.pw.hug<=0||shield)return;S.pw.hug--;shield=true;save();sfx.ok();kidSay('Gabriel te da un abrazo apretado. Si fallas, tienes otra oportunidad.');betsySay('Ay, qué lindo... pero igual te pregunto.');bindPw();}
   function choose(k){const o=opts[k];tries++;
-    if(!o.ok&&shield){shield=false;els[k].disabled=true;els[k].classList.add('bad');sfx.bad();kidSay('¡Uy, esa no era, papá! Inténtalo otra vez.');betsySay(o.betsy?'¡Esa era la mía!':'¡Ja! Casi.');bindPw();return;}
+    if(!o.ok&&shield){shield=false;els[k].disabled=true;els[k].classList.add('bad');sfx.bad();kidSay('Gabriel hace pucheros... ¡inténtalo otra vez!');betsySay(o.betsy?'¡Esa era la mía!':'¡Ja! Casi.');bindPw();return;}
     S.answered++;
     if(o.ok){S.stars++;sfx.ok();}else{sfx.bad();S.wrong.push({d:S.day,q:q.q,a:q.o[0],p:q.p});}
     save();
     const bl=o.ok?pick(B_OK):(o.betsy?pick(B_HERS):pick(B_BAD));
-    const kl=o.ok&&tries>1?'¡Bien, papá! Te salvé.':(o.ok?'':'');
+    const kl=o.ok&&tries>1?'¡Agú! (Gabriel aplaude.)':'';
     let html=head()+scene(bl,kl)+bub+opts.map((x,j)=>`<button class="opt ${x.ok?'ok':(j===k||els[j].classList.contains('bad')?'bad':'dim')}" disabled><span class="k">${L[j]}</span>${esc(x.t)}</button>`).join('');
     html+=`<div class="fb"><div class="r ${o.ok?'g':'b'}">${o.ok?pick(OKS)+' +1 ★':'Incorrecto'}</div>${esc(q.e)}<br><span class="pg">Manual pág. ${esc(q.p)}</span></div>`;
     if(o.betsy)html+=`<div class="betsy"><img src="${IMGSRC.betsy_front}" alt="" style="width:27px"><div>${esc(pick(BETSY_RX))}</div></div>`;
